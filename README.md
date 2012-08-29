@@ -21,7 +21,7 @@ If new repository has different UUID offers the possibility to update working co
 
 	EXAMPLE:
 		$ cd local-svn-folder
-		$ ./relocate.sh -e dir1,dir2,dir3 . http://www.example.com/svn-repo/trunk
+		$ ./relocate_svn.sh -e dir1,dir2,dir3 . http://www.example.com/svn-repo/trunk
 
 		in this case the possible UUID change will not be done in:
 		* local-sv-folder/dir1
