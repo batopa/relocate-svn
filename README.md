@@ -3,11 +3,11 @@ relocate-svn
 
 Bash script to relocate svn repository to new one. Tested with subversion client 1.6.17
 
-If new repository has different UUID offers the possibility to update working copy UUID with new one and then proceed with relocate command
+If new repository has different UUID offers the possibility to update working copy UUID with the new one and then proceed with relocate command
 
-USAGE:
+	USAGE:
 
-$ ./relocate.sh [options] <path_to_old_repository_working_copy> <url_to_new_repository>
+	$ ./relocate.sh [options] path_to_old_repository_working_copy url_to_new_repository
 
 	MANDATORY
 		path_to_old_repository_working_copy: local svn working copy directory
@@ -22,4 +22,7 @@ $ ./relocate.sh [options] <path_to_old_repository_working_copy> <url_to_new_repo
 		$ cd local-svn-folder
 		$ ./relocate.sh -e dir1,dir2,dir3 . http://www.example.com/svn-repo/trunk
 
-		in this case the possible UUID change will not be done in local-sv-folder/dir1, local-sv-folder/dir2, local-sv-folder/dir3
+		in this case the possible UUID change will not be done in:
+		* local-sv-folder/dir1
+		* local-sv-folder/dir2
+		* local-sv-folder/dir3
