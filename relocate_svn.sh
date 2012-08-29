@@ -44,13 +44,16 @@ exit 1
 
 changeUUID() {
 	cmd="find $1 -name entries -exec sed -i 's/$OLD_UUID/$NEW_UUID/g' {} \;"
-	echo "$cmd"
+	if [ $VERBOSE ]; then
+		echo "$cmd"
+	fi
 	eval $cmd
 }
 
+VERBOSE=false
 
 # get named options
-while getopts "he:b:" OPTION
+while getopts "hve:b:" OPTION
 do
 	case $OPTION in
 		h)
@@ -64,13 +67,17 @@ do
 			BACKUP_DIR=$OPTARG
 			shift $((OPTIND-1))
 			;;
+		v)
+			VERBOSE=true
+			shift $((OPTIND-1))
+			;;
 		?)
 			help
 			;;
 	esac
 done
 
-
+# check other args 
 if [ "$#" == 1 ] && [ "$1" == "help" ]; then
 	help
 fi
@@ -155,6 +162,12 @@ if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 	fi
 
 	echo "All UUID changed... proceed"
+
+elif [ "$OLD_REPO" == "$NEW_REPO" ]; then
+
+	echo -e "The repository URL and the UUIDs are identical.\nNo relocate action to do.\nBye"
+	exit 1
+
 fi
 
 # relocate
