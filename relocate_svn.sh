@@ -150,8 +150,8 @@ if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 
 	# no exclude dir... massive UUID change
 	else
-		changeUUID "$SRC"
-		echo "$dir: UUID updated"
+		changeUUID "."
+		echo "`pwd`: UUID updated"
 	fi
 
 	echo "All UUID changed... proceed"
