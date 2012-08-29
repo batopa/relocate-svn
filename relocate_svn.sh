@@ -45,7 +45,7 @@ exit 1
 
 changeUUID() {
 	cmd="find $1 -name entries -exec sed -i 's/$OLD_UUID/$NEW_UUID/g' {} \;"
-	if [ $VERBOSE ]; then
+	if [ $VERBOSE == true ]; then
 		echo "$cmd"
 	fi
 	eval $cmd
@@ -104,6 +104,7 @@ if [ ! -z "$EXCLUDE_DIR" ]; then
 	done
 fi
 
+cd "$SRC"
 echo -e "\nFetching data..."
 OLD_REPO=$(svn info | grep URL | sed 's/URL: //')
 OLD_UUID=$(svn info | grep 'Repository UUID: ' | sed 's/Repository UUID: //')
@@ -114,7 +115,6 @@ echo "Old repository UUID: $OLD_UUID"
 echo "New repository: $NEW_REPO"
 echo -e "New repository UUID: $NEW_UUID \n"
 
-cd "$SRC"
 echo "Proceeding the svn working copy located in '`pwd`' will be relocated to a different repository URL."
 if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 	echo "WARNING: since the UUIDs don't match, the working copy's UUID should be updated to new repository UUID."
@@ -176,5 +176,5 @@ echo "Relocate svn repository"
 svn switch --relocate "$OLD_REPO" "$NEW_REPO" --ignore-externals
 svn up
 echo "--------------------------------------------------"
-svn info
+svn info "$SRC"
 echo "done"
