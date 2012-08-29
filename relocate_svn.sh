@@ -160,6 +160,7 @@ fi
 # relocate
 echo "Relocate svn repository"
 svn switch --relocate "$OLD_REPO" "$NEW_REPO" --ignore-externals
+svn up
 echo "--------------------------------------------------"
 svn info
 echo "done"
