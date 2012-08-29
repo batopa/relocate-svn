@@ -30,6 +30,7 @@ MANDATORY
 
 OPTIONS:
 	-h 		Show this message
+	-v 		verbose mode
 	-e 		Optional: list of excluded dirs separated by comma i.e dir1,dir2,..
 			Useful when the operation requires an UUID update and some subdirs contain others svn
 
@@ -117,7 +118,7 @@ cd "$SRC"
 echo "Proceeding the svn working copy located in '`pwd`' will be relocated to a different repository URL."
 if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 	echo "WARNING: since the UUIDs don't match, the working copy's UUID should be updated to new repository UUID."
-	echo "If you haven't any idea of what is a svn UUID you should be abort the action because the working copy could be corrupted."
+	echo "If you haven't any idea of what is a svn UUID you should be abort the action because it may corrupt the working copy."
 fi
 
 echo "Do you want to proceed? [y/n]"
