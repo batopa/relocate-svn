@@ -7,7 +7,7 @@ If new repository has different UUID offers the possibility to update working co
 
 	USAGE:
 
-	$ ./relocate.sh [options] path_to_old_repository_working_copy url_to_new_repository
+	$ ./relocate_svn.sh [options] path_to_old_repository_working_copy url_to_new_repository
 
 	MANDATORY
 		path_to_old_repository_working_copy: local svn working copy directory
