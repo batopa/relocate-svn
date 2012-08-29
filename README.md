@@ -15,6 +15,7 @@ If new repository has different UUID offers the possibility to update working co
 
 	OPTIONS:
 		-h 		Show help
+		-v 		verbose mode
 		-e 		Optional: list of excluded dirs separated by comma i.e dir1,dir2,..
 				Useful when the operation requires an UUID update and some subdirs contain others svn
 
