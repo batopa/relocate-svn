@@ -22,7 +22,7 @@ USAGE: ./relocate.sh [options] <path_to_old_repository_working_copy> <url_to_new
 
 DESCRIPTION
 	This script run the svn relocate.
-	If needed it permits to force the working copy UUID change
+	If needed it permits to force checkout or the working copy UUID change
 
 MANDATORY
 	path_to_old_repository_working_copy: local svn working copy directory
@@ -46,7 +46,15 @@ exit 1
 
 changeUUID() {
 	cmd="find $1 -name entries -exec sed -i 's/$OLD_UUID/$NEW_UUID/g' {} \;"
-	if [ $VERBOSE == true ]; then
+	if [[ $VERBOSE == true ]]; then
+		echo "$cmd"
+	fi
+	eval $cmd
+}
+
+removeSVN() {
+	cmd="rm -rf `find $1 -type d -name .svn`"
+	if [[ $VERBOSE == true ]]; then
 		echo "$cmd"
 	fi
 	eval $cmd
@@ -109,19 +117,19 @@ fi
 cd "$SRC"
 
 # backup
-if [[ $BACKUP == true ]]; then
+if [ $BACKUP == true ]; then
 	BACKUP_DIR=~/tmp
 	DIRNAME=${PWD##*/}
 	BACKUP_FILE="$DIRNAME-"`date +"%s"`".tar.gz"
 	echo -e "\nBACKUP option selected...\n"
 	echo "A backup file named $BACKUP_FILE will be saved into $BACKUP_DIR"
-	if [[ ! -d $BACKUP_DIR ]]; then
+	if [ ! -d $BACKUP_DIR ]; then
 		mkdir $BACKUP_DIR
 		echo "$BACKUP_DIR directory created"
 	fi
 
 	TAR_OPTIONS="cfz"
-	if [[ $VERBOSE == true ]]; then
+	if [ $VERBOSE == true ]; then
 		TAR_OPTIONS=$TAR_OPTIONS"v"
 		echo "tar $TAR_OPTIONS $BACKUP_DIR/$BACKUP_FILE ../$DIRNAME"
 	fi
@@ -147,19 +155,40 @@ echo "New repository: $NEW_REPO"
 echo -e "New repository UUID: $NEW_UUID \n"
 
 echo "Proceeding the svn working copy located in '`pwd`' will be relocated to a different repository URL."
+
+# can be false or 'removeSVN' or 'changeUUID'
+MISMATCH_UUID_OPERATION=
+
 if [ "$OLD_UUID" != "$NEW_UUID" ]; then
-	echo "WARNING: since the UUIDs don't match, the working copy's UUID should be updated to new repository UUID."
-	echo "If you haven't any idea of what is a svn UUID you should be abort the action because it may corrupt the working copy."
+	echo -e "\n-------------------------------------------------------------------------------"
+	echo "WARNING: working copy UUID doesn't match new repository UUID!"
+	echo -e "This means that the new repository isn't an identical copy of old repository.\nTrying to relocate could be result a bit difficult."
+	echo -e "-------------------------------------------------------------------------------\n"
+	echo -e "You can proceed in two ways:\n"
+	echo "1) Force check out on top of existing files. It will remove all .svn dir then perform a 'svn checkout --force' operation and revert to new repository HEAD (recommended)"
+	echo "2) Trying to override old UUID with new UUID then relocate svn"
+	echo -e "\nWhat do you choose? [1/2/any other key to abort]"
+	read -p "> " ANSWER
+
+	if ! [[ "$ANSWER" =~ ^[0-9]+$ ]] || [[ "$ANSWER" -ne 1 && "$ANSWER" -ne 2 ]]; then
+		die "Aborting action... bye"
+	elif [ "$ANSWER" -eq 1 ]; then
+		echo "Force checkout option selected"
+		MISMATCH_UUID_OPERATION=removeSVN
+	elif [ "$ANSWER" -eq 2 ]; then
+		echo "Changhe UUID and relocate selected"
+		MISMATCH_UUID_OPERATION=changeUUID
+	fi
+else
+	echo "Do you want to proceed? [y/n]"
+	read -p "> " ANSWER
+
+	if [ "$ANSWER" != "y" ]; then
+		die "Aborting action... bye"
+	fi
 fi
 
-echo "Do you want to proceed? [y/n]"
-read -p "> " ANSWER
-
-if [ "$ANSWER" != "y" ]; then
-	die "Aborting action... bye"
-fi
-
-echo "OK, let's go!"
+echo -e "\nOK, let's go!"
 echo "Operating path: $(pwd)";
 
 if [ "$OLD_UUID" != "$NEW_UUID" ]; then
@@ -167,9 +196,15 @@ if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 	# if there is at least an exclude dir scan dir by dir
 	if [ ! -z "$EXCLUDE_DIR" ]; then
 
-		# update UUID in $SRC/.svn
-		changeUUID ".svn"
-		echo "UUID in .svn dir updated";
+		if [ $MISMATCH_UUID_OPERATION == "removeSVN" ]; then
+			# remove .svn
+			rm -rf .svn
+			echo ".svn dir removed";
+		else
+			# update UUID in $SRC/.svn
+			changeUUID ".svn"
+			echo "UUID in .svn dir updated";
+		fi
 
 		#enable for loops over items with spaces in their name
 		IFS=$'\n'
@@ -181,19 +216,29 @@ if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 				if [[ ${EXCLUDE_DIR_ARR[*]} =~ "$dir" ]]; then
 					echo "$dir: skipped"
 				else
-					changeUUID "$dir"
-					echo "$dir: UUID updated"
+					if [ $MISMATCH_UUID_OPERATION == "removeSVN" ]; then
+						removeSVN "$dir"
+						echo "$dir: .svn removed"
+					else
+						changeUUID "$dir"
+						echo "$dir: UUID updated"
+					fi
 				fi
 			fi
 		done
 
 	# no exclude dir... massive UUID change
 	else
-		changeUUID "."
-		echo "`pwd`: UUID updated"
+		if [ $MISMATCH_UUID_OPERATION == "removeSVN" ]; then
+			removeSVN "."
+			echo "`pwd`: all .svn updated"
+		else
+			changeUUID "."
+			echo "`pwd`: UUID updated"
+		fi
 	fi
 
-	echo "All UUID changed... proceed"
+	echo -e "\nProceed\n"
 
 elif [ "$OLD_REPO" == "$NEW_REPO" ]; then
 
@@ -202,9 +247,17 @@ elif [ "$OLD_REPO" == "$NEW_REPO" ]; then
 
 fi
 
-# relocate
-echo "Relocate svn repository"
-svn switch --relocate "$OLD_REPO" "$NEW_REPO" --ignore-externals
+if [ $MISMATCH_UUID_OPERATION == "removeSVN" ]; then
+	# force checkout and revert
+	echo "Force checkout"
+	svn co --force "$NEW_REPO" "."
+	svn revert -R .
+else
+	# relocate
+	echo "Relocate svn repository"
+	svn switch --relocate "$OLD_REPO" "$NEW_REPO" --ignore-externals
+fi
+
 svn up
 echo "--------------------------------------------------"
 svn info "$SRC"
