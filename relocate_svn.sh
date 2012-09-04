@@ -31,6 +31,7 @@ MANDATORY
 OPTIONS:
 	-h 		Show this message
 	-v 		verbose mode
+	-b 		backup directory before relocate svn
 	-e 		Optional: list of excluded dirs separated by comma i.e dir1,dir2,..
 			Useful when the operation requires an UUID update and some subdirs contain others svn
 
@@ -52,9 +53,10 @@ changeUUID() {
 }
 
 VERBOSE=false
+BACKUP=false
 
 # get named options
-while getopts "hve:b:" OPTION
+while getopts "hvbe:" OPTION
 do
 	case $OPTION in
 		h)
@@ -65,7 +67,7 @@ do
 			shift $((OPTIND-1))
 			;;
 		b)
-			BACKUP_DIR=$OPTARG
+			BACKUP=true
 			shift $((OPTIND-1))
 			;;
 		v)
@@ -78,7 +80,7 @@ do
 	esac
 done
 
-# check other args 
+# check other args
 if [ "$#" == 1 ] && [ "$1" == "help" ]; then
 	help
 fi
@@ -105,6 +107,35 @@ if [ ! -z "$EXCLUDE_DIR" ]; then
 fi
 
 cd "$SRC"
+
+# backup
+if [[ $BACKUP == true ]]; then
+	BACKUP_DIR=~/tmp
+	DIRNAME=${PWD##*/}
+	BACKUP_FILE="$DIRNAME-"`date +"%s"`".tar.gz"
+	echo -e "\nBACKUP option selected...\n"
+	echo "A backup file named $BACKUP_FILE will be saved into $BACKUP_DIR"
+	if [[ ! -d $BACKUP_DIR ]]; then
+		mkdir $BACKUP_DIR
+		echo "$BACKUP_DIR directory created"
+	fi
+
+	TAR_OPTIONS="cfz"
+	if [[ $VERBOSE == true ]]; then
+		TAR_OPTIONS=$TAR_OPTIONS"v"
+		echo "tar $TAR_OPTIONS $BACKUP_DIR/$BACKUP_FILE ../$DIRNAME"
+	fi
+	tar $TAR_OPTIONS $BACKUP_DIR"/"$BACKUP_FILE "../$DIRNAME"
+	echo "Backup done in $BACKUP_DIR/$BACKUP_FILE"
+
+	echo "Continue? [y/n]"
+	read -p "> " ANSWER
+
+	if [ "$ANSWER" != "y" ]; then
+		die "Aborting action... bye"
+	fi
+fi
+
 echo -e "\nFetching data..."
 OLD_REPO=$(svn info | grep URL | sed 's/URL: //')
 OLD_UUID=$(svn info | grep 'Repository UUID: ' | sed 's/Repository UUID: //')
