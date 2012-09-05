@@ -165,8 +165,8 @@ if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 	echo -e "This means that the new repository isn't an identical copy of old repository.\nTrying to relocate could be result a bit difficult."
 	echo -e "-------------------------------------------------------------------------------\n"
 	echo -e "You can proceed in two ways:\n"
-	echo "1) Force check out on top of existing files. It will remove all .svn dir then perform a 'svn checkout --force' operation and revert to new repository HEAD (recommended)"
-	echo "2) Trying to override old UUID with new UUID then relocate svn"
+	echo "1. Force check out on top of existing files. It will remove all .svn dir then perform a 'svn checkout --force' operation and revert to new repository HEAD (recommended)"
+	echo "2. Trying to override old UUID with new UUID then relocate svn"
 	echo -e "\nWhat do you choose? [1/2/any other key to abort]"
 	read -p "> " ANSWER
 
