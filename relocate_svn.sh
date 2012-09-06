@@ -18,15 +18,15 @@ die() {
 
 help() {
 cat << EOF
-USAGE: ./relocate_svn.sh [options] <path_to_working_copy> <url_to_new_repository>
+USAGE: ./relocate_svn.sh [options] <path_to_working_copy> <new_repository_url>
 
 DESCRIPTION
 	This script run the svn relocate.
 	If needed it permits to force checkout or the working copy UUID change
 
 MANDATORY
-	path_to_working_copy: local svn working copy directory, that points to old repository
-	url_to_new_repository: url to new svn repository
+	path_to_working_copy: local svn working copy directory, points to old svn repository
+	new_repository_url: url to new svn repository
 
 OPTIONS:
 	-h 		Show this message

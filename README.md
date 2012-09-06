@@ -7,11 +7,11 @@ If new repository has different UUID offers the possibility to force checkout or
 
 	USAGE:
 
-	$ ./relocate_svn.sh [options] path_to_old_repository_working_copy url_to_new_repository
+	$ ./relocate_svn.sh [options] <path_to_working_copy> <new_repository_url>
 
 	MANDATORY
-		path_to_old_repository_working_copy: local svn working copy directory
-		url_to_new_repository: url to new svn repository
+		path_to_working_copy: local svn working copy directory, points to old svn repository
+		new_repository_url: url to new svn repository
 
 	OPTIONS:
 		-h 		Show help
