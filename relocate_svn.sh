@@ -18,14 +18,14 @@ die() {
 
 help() {
 cat << EOF
-USAGE: ./relocate.sh [options] <path_to_old_repository_working_copy> <url_to_new_repository>
+USAGE: ./relocate_svn.sh [options] <path_to_working_copy> <url_to_new_repository>
 
 DESCRIPTION
 	This script run the svn relocate.
 	If needed it permits to force checkout or the working copy UUID change
 
 MANDATORY
-	path_to_old_repository_working_copy: local svn working copy directory
+	path_to_working_copy: local svn working copy directory, that points to old repository
 	url_to_new_repository: url to new svn repository
 
 OPTIONS:
@@ -37,7 +37,7 @@ OPTIONS:
 
 EXAMPLE:
 	$ cd local-svn-folder
-	$ ./relocate.sh -e dir1,dir2,dir3 . http://www.example.com/svn-repo/trunk
+	$ ./relocate_svn.sh -e dir1,dir2,dir3 . http://www.example.com/svn-repo/trunk
 
 	in this case the possible UUID change will not be done in local-sv-folder/dir1, local-sv-folder/dir2, local-sv-folder/dir3
 EOF
@@ -148,6 +148,10 @@ echo -e "\nFetching data..."
 OLD_REPO=$(svn info | grep URL | sed 's/URL: //')
 OLD_UUID=$(svn info | grep 'Repository UUID: ' | sed 's/Repository UUID: //')
 NEW_UUID=$(svn info $NEW_REPO | grep 'Repository UUID: ' | sed 's/Repository UUID: //')
+
+if [ -z "$NEW_UUID" ]; then
+	die "New repository UUID not found, check svn url ...bye"
+fi
 
 echo "Old repository: $OLD_REPO"
 echo "Old repository UUID: $OLD_UUID"
