@@ -114,7 +114,9 @@ if [ ! -z "$EXCLUDE_DIR" ]; then
 	done
 fi
 
+# change directory to $SRC
 cd "$SRC"
+SRC=`pwd`
 
 # backup
 if [ $BACKUP == true ]; then
@@ -193,7 +195,7 @@ else
 fi
 
 echo -e "\nOK, let's go!"
-echo "Operating path: $(pwd)";
+echo "Operating path: $PWD";
 
 if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 
@@ -214,7 +216,7 @@ if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 		IFS=$'\n'
 
 		# update UUID in .svn inside subdir except for EXCLUDE_DIR passed
-		for dir in `ls "$SRC/"`
+		for dir in `pwd | ls`
 		do
 			if [ -d "$SRC/$dir" ]; then
 				if [[ ${EXCLUDE_DIR_ARR[*]} =~ "$dir" ]]; then
