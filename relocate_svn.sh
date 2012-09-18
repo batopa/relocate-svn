@@ -216,7 +216,7 @@ if [ "$OLD_UUID" != "$NEW_UUID" ]; then
 		IFS=$'\n'
 
 		# update UUID in .svn inside subdir except for EXCLUDE_DIR passed
-		for dir in `pwd | ls`
+		for dir in `ls "$SRC"`
 		do
 			if [ -d "$SRC/$dir" ]; then
 				if [[ ${EXCLUDE_DIR_ARR[*]} =~ "$dir" ]]; then
